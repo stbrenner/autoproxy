@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#
+# Call with ". autoproxy"
+#
+
+./autoproxy-helper
+. /tmp/autoproxy-script
