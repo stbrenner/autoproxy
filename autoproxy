@@ -4,5 +4,7 @@
 # Call with ". autoproxy"
 #
 
-./autoproxy-helper
+DIR="$( cd "$( dirname "$BASH_SOURCE[0]}" )" && pwd )"
+
+$DIR/autoproxy-helper
 . /tmp/autoproxy-script
