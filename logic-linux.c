@@ -71,7 +71,7 @@ int identify_proxy(const proxy_config* config, const int pos, const char* proxy_
 
   if ((*config)[pos]) return 0;   // Proxy for this protocoal already set
 
-  sprintf(curlCommand, "curl --max-time 1 -s %s --proxy %s://%s > /tmp  if ((*config)[pos]) return;   // Proxy for this protocoal already set/autoproxy-output", test_url, protocol, proxy_to_check);
+  sprintf(curlCommand, "curl --max-time 1 -s %s --proxy %s://%s > /tmp/autoproxy-output", test_url, protocol, proxy_to_check);
   if (system(curlCommand)) return 1;
 
   (*config)[pos] = malloc(sizeof(char) * (mbstowcs(0, proxy_to_check, 0) + 10));
