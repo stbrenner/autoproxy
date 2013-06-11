@@ -8,29 +8,27 @@ It sets following environment variables:
 * https_proxy
 * ftp_proxy
 
-These environment variables are used by many tool which have a Linux origin (also when used on Windows) - like GIT, apt-get or NPM.
+These environment variables are used by many tool which have a Linux origin (also when used on Windows) - like apt-get GEM, GIT or NPM.
 
-Binaries
---------
+Installation and Usage
+----------------------
 
-Download and unpack...
+### On Linux
 
-Linux: [autoproxy-1.0.tar.gz](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy-1.0.tar.gz) (10 kB)  
-Windows: [autoproxy_1.0.zip](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy_1.0.zip) (5 kB)  
+1. Download: [autoproxy_1.0.tar.gz](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy_1.0.tar.gz) (10 kB)  
 
-How to use
-----------
+2. Installation: Copy the two files from the compressed tar archive to ```/usr/bin/```
 
-##### On Linux:   
-```
-. autoproxy
-```  
-The dot is important. Otherwise autoproxy cannot set the environment variables in the calling process.
+3. Usage: Enter ```. autoproxy``` in any directory in your terminal to detect the proxies and set the respective environment variables.  
+   Note: The dot is important. Otherwise autoproxy cannot set the environment variables in the calling process.
 
-##### On Windows:   
-```
-autoproxy
-```  
+### On Windows:   
+
+1. Download: [autoproxy_1.0.zip](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy_1.0.zip) (5 kB)  
+
+2. Installation: Copy the two files from the ZIP file to any folder and add this folder to your ```%PATH%``` environment variable.
+
+3. Usage: Enter ```autoproxy``` in your command line window to detect the proxies and set the respective environment variables.
 
 How to build from source code
 -----------------------------
