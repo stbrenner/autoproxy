@@ -28,7 +28,6 @@ int main()
 #endif
 
   printf("Detecting proxy configuration...\n");
-  new_proxy_config(&config);
 
   if (detect_proxy_config(&config))
   {

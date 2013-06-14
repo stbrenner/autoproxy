@@ -15,17 +15,17 @@
 /**
  * Write a single config entry to screen and into the shell file
  */
-void write_config_entry(const char* proxy, const char* protocol, FILE* file)
+void write_config_entry(const proxy_config* config, const int pos, FILE* file)
 {
-  if (!proxy)
+  if (!(*config)[pos])
   {
-    printf("%6s -> no proxy\n", protocol);
-    fprintf(file, "export %s_proxy=\n", protocol);
+    printf("%6s -> no proxy\n", TARGET_PROTOCOLS[pos]);
+    fprintf(file, "export %s_proxy=\n", TARGET_PROTOCOLS[pos]);
     return;
   }
 
-  printf("%6s -> %s\n", protocol, proxy);
-  fprintf(file, "export %s_proxy=%s\n", protocol, proxy);
+  printf("%6s -> %s\n", TARGET_PROTOCOLS[pos], (*config)[pos]);
+  fprintf(file, "export %s_proxy=%s\n", TARGET_PROTOCOLS[pos], (*config)[pos]);
 }
 
 /**
@@ -39,22 +39,21 @@ int write_proxy_config(const proxy_config* config)
   file = fopen("/tmp/autoproxy-script", "w");
   if (!file)
   {
-    fprintf(stderr, "Failed to open file.\n");
+    fprintf(stderr, "Failed to open autoproxy-script.\n");
     return 1;
   }
 
   printf("Proxy configuration successfully detected:\n");
   fprintf(file, "#!/bin/bash\n");
 
-  for (i = 0;; i += 2)
+  for (i = 0; i < PROXY_ARRAY_LEN; i++)
   {
-    if (!(*config)[i]) break;
-    write_config_entry((*config)[i + 1], (*config)[i],  file);
+    write_config_entry(config, i, file);
   }
 
   if (fclose(file))
   {
-    fprintf(stderr, "Failed to close file.\n");
+    fprintf(stderr, "Failed to close autoproxy-script.\n");
     return 2;
   }
 
@@ -65,17 +64,22 @@ int write_proxy_config(const proxy_config* config)
  * Check if an connection through the given proxy is possible. An if yes, then
  * store the proxy in the config.
  */
-int identify_proxy(const proxy_config* config, const int pos, const char* proxy_to_check, const char* test_url, const char* protocol)
+int identify_proxy(const proxy_config* config, const int pos, const char* proxy_to_check)
 {
   char curlCommand[1024];
+  int i = 0;
 
-  if ((*config)[pos]) return 0;   // Proxy for this protocoal already set
-
-  sprintf(curlCommand, "curl --max-time 1 -s %s --proxy %s://%s > /tmp/autoproxy-output", test_url, protocol, proxy_to_check);
+  sprintf(curlCommand, "curl --max-time 1 -s %s --proxy %s://%s > /tmp/autoproxy-output", PROXY_TEST_URLS[pos], PROXY_PROTOCOLS[pos], proxy_to_check);
   if (system(curlCommand)) return 1;
 
   (*config)[pos] = malloc(sizeof(char) * (mbstowcs(0, proxy_to_check, 0) + 10));
-  sprintf((*config)[pos], "%s://%s", protocol, proxy_to_check);
+  sprintf((*config)[pos], "%s://%s", PROXY_PROTOCOLS[pos], proxy_to_check);
+
+  // Since the proxy worked for one protocol, we check it also for the others
+  for (i = pos + 1; i < PROXY_ARRAY_LEN; i++)
+  {
+    identify_proxy(config, i, proxy_to_check);
+  } 
 
   return 0;
 }
@@ -83,7 +87,7 @@ int identify_proxy(const proxy_config* config, const int pos, const char* proxy_
 /**
  * Interpret the WPAD file in the temp directory
  */
-int interpret_wpad(const proxy_config* config)
+int interpret_wpad(const proxy_config* config, const int pos)
 {
   FILE*      wpad        = 0;
   char       line[1024];
@@ -92,6 +96,8 @@ int interpret_wpad(const proxy_config* config)
   regmatch_t match[2];
   char       proxy[1024];
   int        proxySize   = 0;
+
+  if ((*config)[pos]) return 0;   // Proxy already defined
 
   wpad = fopen("/tmp/autoproxy-wpad", "r");
   if (!wpad)
@@ -116,9 +122,8 @@ int interpret_wpad(const proxy_config* config)
       memcpy(proxy, line + match[1].rm_so + 1, proxySize);
       *(proxy + proxySize) = 0;
 
-      identify_proxy(config, 1, proxy, "http://www.google.com/",  "http");
-      identify_proxy(config, 3, proxy, "https://www.google.com/", "http");
-      identify_proxy(config, 5, proxy, "ftp://ftp.mozilla.org/",  "ftp");
+      identify_proxy(config, pos, proxy);
+      if ((*config)[pos]) break;   // Proxy detected
     }
     else if (REG_NOMATCH != regexResult)
     {
@@ -135,14 +140,21 @@ int interpret_wpad(const proxy_config* config)
 /**
  * Automatically detect proxies for the various protocols
  */
-int detect_proxy_config(const proxy_config* config)
+int detect_proxy_config(proxy_config* config)
 {
   int result = 0;
+  int i = 0;
+
+  *config = (proxy_config)malloc(PROXY_ARRAY_LEN * sizeof(char*));
+  memset(*config, 0, PROXY_ARRAY_LEN * sizeof(char*));
 
   result = system("curl --proxy \"\" -s http://wpad/wpad.dat > /tmp/autoproxy-wpad");
   if (1536 == result) return 0;   // Direct connection
 
-  if (interpret_wpad(config)) return 1;
+  for (i = 0; i < PROXY_ARRAY_LEN; i++)
+  {
+    if (interpret_wpad(config, i)) return 1;
+  } 
 
   return 0;
 }

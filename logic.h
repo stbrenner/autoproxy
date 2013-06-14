@@ -12,27 +12,51 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-/**
- * Array containing the proxy configuration as strings.
- * 
- * The array contains pairs of protocol->proxy. The even array positions
- * contain protocols (e.g. "http") and the odds contain the corresponding
- * proxies (e.g. "http://proxy:8080").
- *
- * The array is null terminated. So the last element must always be null.
- * 
- * @example {"http",  "http://proxy:8080", 
- *           "https", "http://proxy:8080", 0} 
+/** @defgroup constants
+ * The following constants point to the respective element in the
+ * TARGET_PROTOCOLS array (and related).
+ * @{
  */
-typedef char** proxy_config;
+static const int HTTP_PROXY  = 0;
+static const int HTTPS_PROXY = 1;
+static const int FTP_PROXY   = 2;
+/** @} */
 
 /**
- * Allocates the memory for a new proxy config.
- * 
- * @param config Proxy configuration which is initialized.
- * @note         Memory must be released with free_proxy_config().
+ * Defines the length of the TARGET_PROTOCOLS (and all related) including
+ * terminating null.
  */
-void new_proxy_config(proxy_config* config);
+static const int PROXY_ARRAY_LEN = 3;
+
+/**
+ * Array containing protocols used to reach targets in the internet.
+ */
+static const char* TARGET_PROTOCOLS[] = {"http", "https", "ftp"};
+
+/**
+ * Array containing protocols to access the proxy.
+ * The order matches the TARGET_PROTOCOLS.
+ */
+static const char* PROXY_PROTOCOLS[] = {"http", "http", "ftp", 0};
+
+/**
+ * Array containing the URLs to test aginst.
+ * The order matches the TARGET_PROTOCOLS.
+ */
+static const char* PROXY_TEST_URLS[] = {
+  "http://www.google.com/",
+  "https://www.google.com/",
+  "ftp://ftp.mozilla.org/"};
+
+/**
+ * Array containing the proxy configuration as strings.
+ *
+ * The order must match to the TARGET_PROTOCOLS.
+ * The array is null terminated. So the last element must always be null.
+ * 
+ * @example {"http://proxy:8080", "http://proxy:8080", "ftp://proxy:8080", 0} 
+ */
+typedef char** proxy_config;
 
 /**
  * Free the memory allocated by detect_proxy_config()
@@ -56,6 +80,6 @@ int write_proxy_config(const proxy_config* config);
  *               Memory must be released with free_proxy_config().
  * @return       0 if function succeeded, otherwise error number
  */
-int detect_proxy_config(const proxy_config* config);
+int detect_proxy_config(proxy_config* config);
 
 #endif // LOGIC_H
