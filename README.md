@@ -1,7 +1,7 @@
 autoproxy
 =========
 
-Autoproxy is a command line tool that automatically detects proxies and stores them in the respective environment variables (e.g. http_proxy).
+Autoproxy is a command line tool for Linux and Windows that automatically detects proxies and stores them in the respective environment variables.
 
 It sets following environment variables:
 * http_proxy
@@ -9,6 +9,8 @@ It sets following environment variables:
 * ftp_proxy
 
 These environment variables are used by many tool which have a Linux origin (also when used on Windows) - like apt-get GEM, GIT or NPM.
+
+![Screenshot](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy.png)
 
 Installation and Usage
 ----------------------
