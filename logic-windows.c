@@ -107,6 +107,7 @@ void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
   if(!WinHttpGetProxyForUrl(http_session, testUrlW, &autoProxyOptions, &proxyInfo) || 
      !proxyInfo.lpszProxy)
   {
+    free(testUrlW);
     return;   // No proxy detected
   }
 
@@ -117,6 +118,9 @@ void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
   size = WideCharToMultiByte(CP_UTF8, 0, proxyUrlW, -1, 0, 0, 0, 0);
   (*config)[pos] = (char*)malloc(size * sizeof(char));
   WideCharToMultiByte(CP_UTF8, 0, proxyUrlW, -1, (*config)[pos], size, 0, 0);
+
+  free(testUrlW);
+  free(proxyUrlW);
 }
 
 /**
