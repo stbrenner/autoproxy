@@ -12,19 +12,18 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-/** @defgroup constants
+/**
  * The following constants point to the respective element in the
  * TARGET_PROTOCOLS array (and related).
- * @{
  */
-static const int HTTP_PROXY  = 0;
-static const int HTTPS_PROXY = 1;
-static const int FTP_PROXY   = 2;
-/** @} */
+typedef enum {
+  HTTP_PROXY,
+  HTTPS_PROXY,
+  FTP_PROXY
+} network_protocol;
 
 /**
- * Defines the length of the TARGET_PROTOCOLS (and all related) including
- * terminating null.
+ * Defines the length of the TARGET_PROTOCOLS (and all related)
  */
 static const int PROXY_ARRAY_LEN = 3;
 
@@ -37,7 +36,7 @@ static const char* TARGET_PROTOCOLS[] = {"http", "https", "ftp"};
  * Array containing protocols to access the proxy.
  * The order matches the TARGET_PROTOCOLS.
  */
-static const char* PROXY_PROTOCOLS[] = {"http", "http", "ftp", 0};
+static const char* PROXY_PROTOCOLS[] = {"http", "http", "ftp"};
 
 /**
  * Array containing the URLs to test aginst.
@@ -52,9 +51,8 @@ static const char* PROXY_TEST_URLS[] = {
  * Array containing the proxy configuration as strings.
  *
  * The order must match to the TARGET_PROTOCOLS.
- * The array is null terminated. So the last element must always be null.
  * 
- * @example {"http://proxy:8080", "http://proxy:8080", "ftp://proxy:8080", 0} 
+ * @example {"http://proxy:8080", "http://proxy:8080", "ftp://proxy:8080"} 
  */
 typedef char** proxy_config;
 
