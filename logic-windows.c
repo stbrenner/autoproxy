@@ -15,26 +15,26 @@
 /**
  * Writes a single proxy setting to the batch file
  */
-void write_proxy_to_batch_file(FILE* file, const proxy_config* config, const int pos)
+void write_proxy_to_batch_file(FILE* file, const proxy_config* config, const network_protocol protocol)
 {
   wchar_t* protocolW = 0;
   wchar_t* proxyW    = 0;
-  int size           = 0;
+  int      size      = 0;
 
-  if (!(*config)[pos])
+  if (!(*config)[protocol])
   {
-    printf("%6s -> no proxy\n", TARGET_PROTOCOLS[pos]);
-    fprintf(file, "set %s_proxy=\n", TARGET_PROTOCOLS[pos]);
+    printf("%6s -> no proxy\n", TARGET_PROTOCOLS[protocol]);
+    fprintf(file, "set %s_proxy=\n", TARGET_PROTOCOLS[protocol]);
     return;
   }
 
-  size = MultiByteToWideChar(CP_UTF8, 0, (*config)[pos], -1, 0, 0);
+  size = MultiByteToWideChar(CP_UTF8, 0, (*config)[protocol], -1, 0, 0);
   proxyW = (wchar_t*)malloc(size * sizeof(wchar_t));
-  MultiByteToWideChar(CP_UTF8, 0, (*config)[pos], -1, proxyW, size);
+  MultiByteToWideChar(CP_UTF8, 0, (*config)[protocol], -1, proxyW, size);
 
-  size = MultiByteToWideChar(CP_UTF8, 0, TARGET_PROTOCOLS[pos], -1, 0, 0);
+  size = MultiByteToWideChar(CP_UTF8, 0, TARGET_PROTOCOLS[protocol], -1, 0, 0);
   protocolW = (wchar_t*)malloc(size * sizeof(wchar_t));
-  MultiByteToWideChar(CP_UTF8, 0, TARGET_PROTOCOLS[pos], -1, protocolW, size);
+  MultiByteToWideChar(CP_UTF8, 0, TARGET_PROTOCOLS[protocol], -1, protocolW, size);
 
   wprintf(L"%6s -> %s\n", protocolW, proxyW);
   fwprintf(file, L"set %s_proxy=%s\n", protocolW, proxyW);
@@ -68,7 +68,7 @@ int write_proxy_config(const proxy_config* config)
 
   for (i = 0; i < PROXY_ARRAY_LEN; i++)
   {
-    write_proxy_to_batch_file(file, config, i);
+    write_proxy_to_batch_file(file, config, (network_protocol)i);
   }
 
   if (fclose(file))
@@ -83,7 +83,7 @@ int write_proxy_config(const proxy_config* config)
 /**
  * Detect the proxy for a specific protocol
  */
-void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
+void detect_proxy(HINTERNET http_session, proxy_config* config, network_protocol protocol)
 {
   wchar_t*                  firstProxy        = 0;
   wchar_t*                  nextProxy         = 0;
@@ -92,6 +92,7 @@ void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
   int                       size              = 0;
   wchar_t*                  proxyUrlW         = 0;
   wchar_t*                  testUrlW          = 0;
+  wchar_t*                  protocolW         = 0;
 
   ZeroMemory(&proxyInfo, sizeof(proxyInfo));
   ZeroMemory(&autoProxyOptions, sizeof(autoProxyOptions));
@@ -100,9 +101,9 @@ void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
   autoProxyOptions.dwAutoDetectFlags = WINHTTP_AUTO_DETECT_TYPE_DHCP | WINHTTP_AUTO_DETECT_TYPE_DNS_A;
   autoProxyOptions.fAutoLogonIfChallenged = TRUE;
 
-  size = MultiByteToWideChar(CP_UTF8, 0, PROXY_TEST_URLS[pos], -1, 0, 0);
+  size = MultiByteToWideChar(CP_UTF8, 0, PROXY_TEST_URLS[protocol], -1, 0, 0);
   testUrlW = (wchar_t*)malloc(size * sizeof(wchar_t));
-  MultiByteToWideChar(CP_UTF8, 0, PROXY_TEST_URLS[pos], -1, testUrlW, size);
+  MultiByteToWideChar(CP_UTF8, 0, PROXY_TEST_URLS[protocol], -1, testUrlW, size);
 
   if(!WinHttpGetProxyForUrl(http_session, testUrlW, &autoProxyOptions, &proxyInfo) || 
      !proxyInfo.lpszProxy)
@@ -111,16 +112,21 @@ void detect_proxy(HINTERNET http_session, proxy_config* config, int pos)
     return;   // No proxy detected
   }
 
+  size = MultiByteToWideChar(CP_UTF8, 0, PROXY_PROTOCOLS[protocol], -1, 0, 0);
+  protocolW = (wchar_t*)malloc(size * sizeof(wchar_t));
+  MultiByteToWideChar(CP_UTF8, 0, PROXY_PROTOCOLS[protocol], -1, protocolW, size);
+
   firstProxy = wcstok_s(proxyInfo.lpszProxy, L";", &nextProxy);
   proxyUrlW = (wchar_t*)malloc((wcslen(firstProxy) + 10) * sizeof(wchar_t));
-  wsprintf(proxyUrlW, L"%s://%s", PROXY_PROTOCOLS[pos], firstProxy); 
+  wsprintf(proxyUrlW, L"%s://%s", protocolW, firstProxy); 
 
   size = WideCharToMultiByte(CP_UTF8, 0, proxyUrlW, -1, 0, 0, 0, 0);
-  (*config)[pos] = (char*)malloc(size * sizeof(char));
-  WideCharToMultiByte(CP_UTF8, 0, proxyUrlW, -1, (*config)[pos], size, 0, 0);
+  (*config)[protocol] = (char*)malloc(size * sizeof(char));
+  WideCharToMultiByte(CP_UTF8, 0, proxyUrlW, -1, (*config)[protocol], size, 0, 0);
 
   free(testUrlW);
   free(proxyUrlW);
+  free(protocolW);
 }
 
 /**
@@ -143,7 +149,7 @@ int detect_proxy_config(proxy_config* config)
 
   for (i = 0; i < PROXY_ARRAY_LEN; i++)
   {
-    detect_proxy(httpSession, config, i);
+    detect_proxy(httpSession, config, (network_protocol)i);
   } 
 
   WinHttpCloseHandle(httpSession);
