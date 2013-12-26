@@ -5,6 +5,11 @@ enable_testing()
 add_definitions(-DUNICODE -D_UNICODE)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MTd")
+  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MT")
+  set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -MT")
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -MT")
+
   add_definitions(/W4)
   add_definitions(/WX)
   add_executable(autoproxy-helper main.c logic.c logic-windows.c) 
