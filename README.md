@@ -10,7 +10,7 @@ It sets following environment variables:
 
 These environment variables are used by many tool which have a Linux origin (also when used on Windows) - like apt-get GEM, GIT or NPM.
 
-![Screenshot](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy.png)
+![Screenshot](/screenshot.png?raw=true)
 
 Installation and Usage
 ----------------------
