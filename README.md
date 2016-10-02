@@ -17,7 +17,7 @@ Installation and Usage
 
 ### On Linux
 
-1. Download: [autoproxy_1.0.tar.gz](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy_1.0.tar.gz) (10 kB)  
+1. Download: [autoproxy_1.0.tar.gz](http://wp10714721.server-he.de/downloads/autoproxy/autoproxy_1.0.tar.gz) (10 kB)  
 
 2. Installation: Copy the two files from the compressed tar archive to ```/usr/bin/```
 
@@ -26,7 +26,7 @@ Installation and Usage
 
 ### On Windows:   
 
-1. Download: [autoproxy_1.0.zip](http://www.stephan-brenner.com/downloads/autoproxy/autoproxy_1.0.zip) (39 kB)  
+1. Download: [autoproxy_1.0.zip](http://wp10714721.server-he.de/downloads/autoproxy/autoproxy_1.0.zip) (39 kB)  
 
 2. Installation: Copy the two files from the ZIP file to any folder and add this folder to your ```%PATH%``` environment variable.
 
